@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Fisioterapi | Skrining & Test Lanjutan</title>
+    <style>
+        :root {
+            --child: #FF6B6B;
+            --child-light: #FFE3E3;
+            --child-dark: #C0392B;
+            --adult: #4ECDC4;
+            --adult-light: #E0F7F5;
+            --adult-dark: #1A8A7D;
+            --elderly: #9B59B6;
+            --elderly-light: #F3E5F5;
+            --elderly-dark: #6C3483;
+            --bg: #F5F7FA;
+            --card: #FFFFFF;
+            --text: #2C3E50;
+            --text-light: #5D6D7E;
+            --border: #E8ECF1;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --shadow-lg: 0 12px 35px rgba(0,0,0,0.08);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+        body::before{
+            content: '';
+            position: fixed;
+            top:0;left:0;width:100%;height:100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255,107,107,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 90% 70%, rgba(78,205,196,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(155,89,182,0.03) 0%, transparent 50%);
+            pointer-events: none; z-index:0;
+        }
+        .container{
+            max-width: 950px;
+            margin:0 auto;
+            padding:20px 20px 60px;
+            position: relative;
+            z-index:1;
+        }
+        .header{
+            text-align: center;
+            padding:40px 20px 20px;
+            animation: fadeInDown 0.7s ease;
+        }
+        .header .icon{ font-size:56px; display:inline-block; animation: float 3s ease-in-out infinite; }
+        @keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+        .header h1{
+            font-size: clamp(1.7rem, 3.5vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin:8px 0 4px;
+        }
+        .header .subtitle{
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        .category-grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap:20px;
+            margin-top:30px;
+            animation: fadeInUp 0.7s ease;
+        }
+        .cat-card{
+            background: var(--card);
+            border-radius: var(--radius);
+            padding:32px 24px 24px;
+            text-align: center;
+            cursor: pointer;
+            border:2px solid var(--border);
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+        .cat-card:hover{ transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+        .cat-card:active{ transform: scale(0.97); }
+        .cat-card.child{ border-top: 6px solid var(--child); }
+        .cat-card.child:hover{ border-color: var(--child); background: var(--child-light); }
+        .cat-card.adult{ border-top: 6px solid var(--adult); }
+        .cat-card.adult:hover{ border-color: var(--adult); background: var(--adult-light); }
+        .cat-card.elderly{ border-top: 6px solid var(--elderly); }
+        .cat-card.elderly:hover{ border-color: var(--elderly); background: var(--elderly-light); }
+        .cat-card .emoji{ font-size:58px; display:block; margin-bottom:12px; transition: transform var(--transition); }
+        .cat-card:hover .emoji{ transform: scale(1.1) rotate(-4deg); }
+        .cat-card h3{ font-size:1.4rem; font-weight:700; margin-bottom:6px; }
+        .cat-card p{ font-size:0.9rem; color:var(--text-light); line-height:1.5; margin-bottom:12px; }
+        .badge{
+            display:inline-block;
+            padding:6px 16px;
+            border-radius: 20px;
+            font-size:0.78rem;
+            font-weight:600;
+        }
+        .badge-child{ background:#FFE3E3; color:var(--child-dark); }
+        .badge-adult{ background:#E0F7F5; color:var(--adult-dark); }
+        .badge-elderly{ background:#F3E5F5; color:var(--elderly-dark); }
+
+        .progress-wrap{ display:none; margin-bottom:24px; }
+        .progress-wrap.active{ display:block; animation: fadeIn 0.4s ease; }
+        .progress-info{ display:flex; justify-content:space-between; font-size:0.85rem; font-weight:500; margin-bottom:6px; }
+        .progress-bar{ height:10px; background:#e9ecef; border-radius:20px; overflow:hidden; }
+        .progress-fill{ height:100%; border-radius:20px; transition: width 0.5s ease; }
+        .fill-child{ background: var(--child); }
+        .fill-adult{ background: var(--adult); }
+        .fill-elderly{ background: var(--elderly); }
+
+        .survey-section{ display:none; animation: fadeIn 0.5s ease; }
+        .survey-section.active{ display:block; }
+        .domain-header{
+            font-weight:700;
+            font-size:1rem;
+            padding: 8px 0 4px;
+            margin-top: 10px;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .survey-card{
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 20px 20px 16px;
+            margin-bottom:12px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid transparent;
+            transition: all var(--transition);
+        }
+        .survey-card.child-theme{ border-left-color: var(--child); }
+        .survey-card.adult-theme{ border-left-color: var(--adult); }
+        .survey-card.elderly-theme{ border-left-color: var(--elderly); }
+        .survey-card .q-num{
+            display:inline-block;
+            width:30px; height:30px;
+            line-height:30px; text-align:center;
+            border-radius:50%;
+            font-weight:700;
+            font-size:0.8rem;
+            color:#fff;
+            margin-right:8px;
+        }
+        .child-theme .q-num{ background:var(--child); }
+        .adult-theme .q-num{ background:var(--adult); }
+        .elderly-theme .q-num{ background:var(--elderly); }
+        .survey-card h4{ display:inline; font-size:1rem; font-weight:600; }
+        .options{ margin-top:12px; display:flex; flex-wrap:wrap; gap:10px; }
+        .option-btn{
+            flex: 1 1 auto; min-width: 90px;
+            padding: 10px 14px;
+            border-radius: 25px;
+            border:2px solid var(--border);
+            background:#fff;
+            cursor:pointer;
+            font-size:0.88rem;
+            font-weight:500;
+            transition: all var(--transition);
+            text-align:center;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .option-btn:hover{ border-color:#b0bec5; background:#fafafa; }
+        .option-btn.selected{
+            border-color: var(--adult);
+            background: #E0F7F5;
+            color: var(--adult-dark);
+            font-weight:600;
+            box-shadow: 0 0 0 3px rgba(78,205,196,0.15);
+        }
+        .child-theme .option-btn.selected{
+            border-color:var(--child);
+            background:#FFE3E3;
+            color:var(--child-dark);
+            box-shadow: 0 0 0 3px rgba(255,107,107,0.15);
+        }
+        .elderly-theme .option-btn.selected{
+            border-color:var(--elderly);
+            background:#F3E5F5;
+            color:var(--elderly-dark);
+            box-shadow: 0 0 0 3px rgba(155,89,182,0.15);
+        }
+
+        .btn{
+            display:inline-block;
+            padding:13px 28px;
+            border-radius:30px;
+            font-size:0.95rem;
+            font-weight:600;
+            cursor:pointer;
+            border:none;
+            transition: all var(--transition);
+            letter-spacing:0.02em;
+            text-align:center;
+            text-decoration: none;
+        }
+        .btn-primary{ background:var(--adult); color:#fff; box-shadow:0 4px 15px rgba(78,205,196,0.3); }
+        .btn-primary:hover{ background:#3dbdb5; transform:translateY(-2px); box-shadow:0 8px 25px rgba(78,205,196,0.4); }
+        .btn-child{ background:var(--child); color:#fff; box-shadow:0 4px 15px rgba(255,107,107,0.3); }
+        .btn-child:hover{ background:#e85d5d; }
+        .btn-elderly{ background:var(--elderly); color:#fff; box-shadow:0 4px 15px rgba(155,89,182,0.3); }
+        .btn-elderly:hover{ background:#8e44ad; }
+        .btn-outline{ background:#fff; border:2px solid var(--border); color:var(--text); }
+        .btn-outline:hover{ border-color:#b0bec5; background:#fafafa; }
+        .btn:active{ transform:scale(0.96); }
+        .btn:disabled{ opacity:0.5; cursor:not-allowed; pointer-events:none; }
+        .btn-group{ display:flex; flex-wrap:wrap; gap:12px; margin-top:24px; justify-content:center; }
+
+        .result-section{ display:none; animation: fadeInUp 0.6s ease; }
+        .result-section.active{ display:block; }
+        .result-card{
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            box-shadow: var(--shadow-lg);
+            margin-top: 20px;
+        }
+        .result-header{
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-header h2{
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .score-circle{
+            width:100px; height:100px;
+            border-radius:50%;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2rem;
+            font-weight:800;
+            color:#fff;
+            margin:12px 0;
+        }
+        .score-low{ background:#27ae60; }
+        .score-mid{ background:#f39c12; }
+        .score-high{ background:#e74c3c; }
+        .domain-bars{
+            margin-top:20px;
+            background:#f9fafb;
+            border-radius:var(--radius-sm);
+            padding:16px 20px;
+        }
+        .domain-item{ margin-bottom:12px; }
+        .domain-label{
+            display:flex;
+            justify-content:space-between;
+            font-size:0.85rem;
+            font-weight:600;
+            margin-bottom:4px;
+        }
+        .domain-bar-bg{ height:8px; background:#e9ecef; border-radius:10px; overflow:hidden; }
+        .domain-bar-fill{ height:100%; border-radius:10px; transition: width 0.8s ease; }
+        .domain-low{ background:#27ae60; }
+        .domain-mid{ background:#f39c12; }
+        .domain-high{ background:#e74c3c; }
+        .result-detail{
+            background:#f9fafb;
+            border-radius:var(--radius-sm);
+            padding:20px;
+            margin-top:16px;
+        }
+        .result-detail h4{
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .result-detail ul{ list-style:none; padding:0; }
+        .result-detail ul li{
+            padding:6px 0 6px 28px;
+            position:relative;
+            font-size:0.95rem;
+        }
+        .result-detail ul li::before{
+            position:absolute;
+            left:0;
+            font-weight:700;
+        }
+        .li-good::before{ content:'✓'; color:#27ae60; }
+        .li-warn::before{ content:'⚠'; color:#e67e22; }
+        .li-danger::before{ content:'✗'; color:#e74c3c; }
+
+        .result-table{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+        .result-table th, .result-table td{
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .result-table th{
+            background: #f0f4f8;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .result-table td{
+            background: #fff;
+        }
+        .exam-list, .exercise-list{
+            margin-top: 12px;
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .exam-list h5, .exercise-list h5{
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .action-box{
+            background: #f0faf9;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #d0f0ed;
+        }
+        .action-box p{
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #1A8A7D;
+        }
+        .advanced-test-box{
+            margin-top: 16px;
+            padding: 20px;
+            background: #fff;
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border);
+            text-align: center;
+        }
+        .back-link{
+            display:inline-block;
+            margin-top:12px;
+            color:var(--text-light);
+            cursor:pointer;
+            font-size:0.9rem;
+            text-decoration:underline;
+            transition:color var(--transition);
+        }
+        .back-link:hover{ color:var(--text); }
+
+        @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+        @keyframes fadeInUp{ from{opacity:0;transform:translateY(25px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInDown{ from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+
+        @media (max-width:650px){
+            .category-grid{ grid-template-columns:1fr; }
+            .options{ flex-direction:column; }
+            .option-btn{ min-width:100%; }
+            .btn-group{ flex-direction:column; }
+            .btn{ width:100%; }
+            .result-table th, .result-table td{ padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header" id="mainHeader">
+        <span class="icon">🩺</span>
+        <h1>Survey Pemeriksaan Fisioterapi</h1>
+        <p class="subtitle">Pilih kategori usia untuk memulai assessment yang mudah dipahami</p>
+    </div>
+
+    <div class="category-grid" id="categoryGrid">
+        <div class="cat-card child" onclick="startSurvey('anak')">
+            <span class="emoji">👶</span>
+            <h3>Anak-Anak</h3>
+            <p>Perkembangan gerak, postur tubuh, keseimbangan, kekuatan otot, & kondisi khusus</p>
+            <span class="badge badge-child">Usia 0–12 tahun</span>
+        </div>
+        <div class="cat-card adult" onclick="startSurvey('dewasa')">
+            <span class="emoji">🧑‍💼</span>
+            <h3>Dewasa</h3>
+            <p>Nyeri leher/punggung, posisi duduk, cedera, ergonomi, stres & tidur</p>
+            <span class="badge badge-adult">Usia 13–59 tahun</span>
+        </div>
+        <div class="cat-card elderly" onclick="startSurvey('lansia')">
+            <span class="emoji">👴</span>
+            <h3>Lansia</h3>
+            <p>Risiko jatuh, keseimbangan, nyeri sendi, kekuatan otot & kesehatan tulang</p>
+            <span class="badge badge-elderly">Usia 60+ tahun</span>
+        </div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+        <div class="progress-info"><span id="progressLabel">Progress</span><span id="progressPercent">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+    </div>
+
+    <div class="survey-section" id="surveySection"></div>
+    <div class="result-section" id="resultSection"></div>
+    <div style="text-align:center;margin-top:10px;" id="backWrap" class="survey-section">
+        <span class="back-link" onclick="goBack()">← Kembali ke pilihan kategori</span>
+    </div>
+</div>
+
+<script>
+    // Data survey sama seperti sebelumnya
+    const surveyData = {
+        anak: {
+            title: 'Pemeriksaan Fisioterapi — Anak-Anak',
+            theme: 'child-theme',
+            fillClass: 'fill-child',
+            btnClass: 'btn-child',
+            domains: {
+                motorik: { name:'Perkembangan Motorik', questions:['q1','q2'] },
+                postur: { name:'Postur & Tulang Belakang', questions:['q3','q4'] },
+                keseimbangan: { name:'Keseimbangan & Koordinasi', questions:['q5','q6'] },
+                nyeri_otot: { name:'Nyeri & Kelemahan Otot', questions:['q7','q8'] },
+                kondisi_khusus: { name:'Kondisi Medis Khusus', questions:['q9','q10','q11','q12'] }
+            },
+            questions: [
+                {id:'q1', domain:'motorik', q:'Apakah anak Anda terlambat dalam kemampuan gerak seperti berguling, duduk, merangkak, atau berjalan dibanding anak seusianya?', opts:['Tidak','Sedikit terlambat (1-3 bulan)','Cukup terlambat (3-6 bulan)','Sangat terlambat (lebih dari 6 bulan)'], scores:[0,1,2,3]},
+                {id:'q2', domain:'motorik', q:'Apakah anak kesulitan melakukan gerakan kecil seperti memegang pensil, menyendok makanan, atau menggunting?', opts:['Tidak','Sedikit kesulitan','Cukup sulit','Sangat sulit'], scores:[0,1,2,3]},
+                {id:'q3', domain:'postur', q:'Apakah posisi kepala anak sering miring ke satu sisi, atau bahunya tidak sejajar?', opts:['Tidak','Jarang terlihat','Sering terlihat','Hampir selalu'], scores:[0,1,2,3]},
+                {id:'q4', domain:'postur', q:'Apakah punggung anak terlihat bengkok atau ada bagian yang menonjol? (Misalnya bahu miring, pinggang tidak simetris)', opts:['Tidak','Sedikit mencurigakan','Cukup jelas','Sangat jelas/sudah didiagnosis'], scores:[0,1,2,3]},
+                {id:'q5', domain:'keseimbangan', q:'Apakah anak sering terjatuh atau oleng saat berjalan atau bermain?', opts:['Tidak','Jarang','Sering (1-2 kali seminggu)','Sangat sering'], scores:[0,1,2,3]},
+                {id:'q6', domain:'keseimbangan', q:'Apakah anak mampu berdiri dengan satu kaki selama beberapa detik? (Misalnya anak 4 tahun: 5 detik, 5 tahun: 10 detik)', opts:['Ya, normal','Sedikit lebih pendek','Jauh lebih pendek','Tidak bisa sama sekali'], scores:[0,1,2,3]},
+                {id:'q7', domain:'nyeri_otot', q:'Apakah anak mengeluh sakit di kaki, lutut, atau punggung setelah bermain atau beraktivitas?', opts:['Tidak pernah','Jarang','Sering','Hampir setiap hari'], scores:[0,1,2,3]},
+                {id:'q8', domain:'nyeri_otot', q:'Apakah anak terlihat cepat lelah saat berjalan atau sulit naik tangga dibanding teman sebayanya?', opts:['Tidak','Sedikit','Cukup lemah','Sangat lemah'], scores:[0,1,2,3]},
+                {id:'q9', domain:'kondisi_khusus', q:'Apakah anak memiliki kondisi bawaan yang mempengaruhi gerak, seperti lumpuh otak (cerebral palsy), kelainan tulang belakang (spina bifida), atau sindrom Down?', opts:['Tidak','Ada, tapi ringan dan mandiri','Ada, dengan bantuan','Ada dan sangat tergantung bantuan'], scores:[0,2,4,6]},
+                {id:'q10', domain:'kondisi_khusus', q:'Apakah anak pernah mengalami kejang atau gangguan saraf yang mempengaruhi gerakan?', opts:['Tidak','Terkontrol baik','Kadang kambuh','Sering/tidak terkontrol'], scores:[0,1,2,3]},
+                {id:'q11', domain:'kondisi_khusus', q:'Apakah anak menggunakan alat bantu berjalan seperti penyangga kaki (orthosis) atau alat bantu jalan (walker)?', opts:['Tidak','Kadang-kadang','Sering','Selalu'], scores:[0,2,4,6]},
+                {id:'q12', domain:'kondisi_khusus', q:'Apakah anak pernah operasi tulang atau saraf yang membuat gerakannya terbatas?', opts:['Tidak','Ya, sudah pulih total','Ya, masih pemulihan','Ya, keterbatasan menetap'], scores:[0,2,4,6]}
+            ],
+            furtherExams: {
+                motorik: [ { name:'Denver Developmental Screening Test (DDST)', desc:'Skrining perkembangan umum anak' } ],
+                postur: [ { name:'Pemeriksaan Postur Statis & Dinamis', desc:'Observasi dan pengukuran dengan plumb line' } ],
+                keseimbangan: [ { name:'Pediatric Balance Scale', desc:'Uji keseimbangan fungsional pada anak' } ],
+                nyeri_otot: [ { name:'Manual Muscle Testing (MMT)', desc:'Evaluasi kekuatan otot secara manual' } ],
+                kondisi_khusus: [ { name:'Gross Motor Function Measure (GMFM)', desc:'Untuk anak dengan cerebral palsy' } ]
+            },
+            exerciseRecs: {
+                motorik: { name:'Stimulasi Motorik Kasar', desc:'Ajak anak merangkak melewati bantal, berjalan di permukaan rumput, dan melompati garis. Lakukan 10-15 menit setiap hari sambil bermain.' },
+                postur: { name:'Latihan Postur', desc:'Minta anak duduk tegak dengan punggung menempel di dinding selama 1 menit, ulangi 3 kali. Lakukan peregangan leher menoleh ke kanan-kiri, tahan 5 detik.' },
+                keseimbangan: { name:'Latihan Keseimbangan', desc:'Bermain berdiri satu kaki bergantian sambil berpegangan kursi, tahan 5-10 detik. Ulangi 5 kali setiap sisi.' },
+                nyeri_otot: { name:'Penguatan Otot', desc:'Latihan naik turun tangga kecil dengan pengawasan, squat ringan sambil bermain, dan peregangan otot kaki seperti menyentuh ujung kaki.' },
+                kondisi_khusus: { name:'Latihan Fungsional', desc:'Ikuti program dari fisioterapis, bisa berupa latihan gerak sendi pasif atau aktif, latihan dengan bola, dan penggunaan alat bantu yang tepat.' }
+            },
+            advancedTest: {
+                title: 'Test Lanjutan: Skrining Motorik Kasar & Fungsional Anak',
+                desc: 'Kuesioner mendalam untuk mengevaluasi kemampuan motorik kasar, keseimbangan, dan koordinasi.',
+                sections: [
+                    {
+                        name: 'Motorik Kasar & Mobilitas',
+                        questions: [
+                            {id:'a1', q:'Apakah anak bisa melompat dengan dua kaki meninggalkan lantai secara bersamaan?', opts:['Ya, lancar','Bisa tapi ragu','Hanya jinjit','Belum bisa'], scores:[0,1,2,3]},
+                            {id:'a2', q:'Apakah anak bisa berjalan mundur minimal 5 langkah tanpa terjatuh?', opts:['Ya, lancar','Bisa tapi pelan','Hanya 1-2 langkah','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a3', q:'Apakah anak bisa naik tangga dengan kaki bergantian tanpa berpegangan?', opts:['Ya, tanpa bantuan','Dengan bantuan tangan','Merangkak naik','Tidak bisa'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Keseimbangan & Koordinasi',
+                        questions: [
+                            {id:'a4', q:'Apakah anak bisa menangkap bola besar yang dilemparkan dari jarak 1 meter?', opts:['Selalu berhasil','Kadang berhasil','Jarang berhasil','Tidak pernah'], scores:[0,1,2,3]},
+                            {id:'a5', q:'Apakah anak bisa berdiri dengan satu kaki selama 5 detik tanpa berpegangan?', opts:['Ya, lebih dari 5 detik','3-5 detik','1-2 detik','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a6', q:'Apakah anak sering menghindari permainan fisik karena cepat lelah atau tidak percaya diri?', opts:['Tidak','Jarang','Sering','Selalu'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Aktivitas Sehari-hari',
+                        questions: [
+                            {id:'a7', q:'Apakah anak bisa memakai baju sendiri tanpa bantuan?', opts:['Ya, lancar','Dengan sedikit bantuan','Butuh banyak bantuan','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a8', q:'Apakah anak bisa makan menggunakan sendok tanpa menumpahkan?', opts:['Ya, rapi','Kadang tumpah','Sering tumpah','Belum bisa'], scores:[0,1,2,3]},
+                            {id:'a9', q:'Apakah anak mampu berjalan di permukaan tidak rata (rumput, pasir) tanpa terjatuh?', opts:['Ya, stabil','Agak oleng','Sering jatuh','Tidak berani'], scores:[0,1,2,3]},
+                            {id:'a10', q:'Apakah anak bisa mengikuti instruksi gerakan sederhana (contoh: sentuh kepala, putar badan)?', opts:['Ya, cepat','Perlu pengulangan','Sulit memahami','Tidak bisa'], scores:[0,1,2,3]}
+                        ]
+                    }
+                ],
+                interpretation: (score, max) => {
+                    const pct = Math.round((score/max)*100);
+                    if(pct <= 20) return 'Motorik kasar dan fungsional anak tergolong baik. Lanjutkan stimulasi sesuai usia.';
+                    if(pct <= 50) return 'Ada beberapa area yang perlu ditingkatkan. Disarankan konsultasi dengan fisioterapis anak.';
+                    return 'Kemungkinan keterlambatan motorik signifikan. Segera evaluasi dengan fisioterapis spesialis anak.';
+                },
+                sectionAdvice: {
+                    'Motorik Kasar & Mobilitas': 'Latihan melompat di tempat, berjalan mundur dengan panduan, dan naik turun tangga dengan pengawasan.',
+                    'Keseimbangan & Koordinasi': 'Bermain lempar tangkap bola, berdiri satu kaki sambil bernyanyi, dan berjalan di garis lurus.',
+                    'Aktivitas Sehari-hari': 'Latih anak memakai baju sendiri, makan dengan sendok, dan eksplorasi permukaan berbeda (rumput, karpet).'
+                }
+            }
+        },
+        dewasa: {
+            title: 'Pemeriksaan Fisioterapi — Dewasa',
+            theme: 'adult-theme',
+            fillClass: 'fill-adult',
+            btnClass: 'btn-primary',
+            domains: {
+                nyeri: { name:'Nyeri Muskuloskeletal', questions:['q1','q2','q3'] },
+                postur: { name:'Postur & Ergonomi', questions:['q4','q5','q6'] },
+                aktivitas: { name:'Cedera & Aktivitas', questions:['q7','q8','q9'] },
+                stres: { name:'Stres & Pemulihan', questions:['q10','q11','q12'] }
+            },
+            questions: [
+                {id:'q1', domain:'nyeri', q:'Seberapa sering leher atau bahu Anda terasa nyeri dalam 3 bulan terakhir?', opts:['Tidak pernah','Jarang','Sering','Hampir setiap hari'], scores:[0,1,2,3]},
+                {id:'q2', domain:'nyeri', q:'Apakah punggung bagian bawah Anda sering sakit sampai mengganggu kegiatan sehari-hari?', opts:['Tidak','Ringan/sesekali','Cukup mengganggu','Sangat mengganggu/kronis'], scores:[0,1,2,3]},
+                {id:'q3', domain:'nyeri', q:'Apakah rasa sakitnya menjalar ke lengan atau kaki (seperti kesemutan atau nyeri menjalar)?', opts:['Tidak','Jarang','Kadang-kadang','Sering/terus menerus'], scores:[0,1,2,3]},
+                {id:'q4', domain:'postur', q:'Berapa lama Anda duduk terus-menerus dalam sehari, misalnya saat kerja atau di kendaraan?', opts:['Kurang dari 2 jam','2-4 jam','4-8 jam','Lebih dari 8 jam'], scores:[0,1,2,3]},
+                {id:'q5', domain:'postur', q:'Saat duduk, apakah Anda sering membungkuk atau kepala cenderung maju ke depan (seperti "leher tegang")?', opts:['Tidak, postur baik','Kadang-kadang','Sering','Selalu/sudah kebiasaan'], scores:[0,1,2,3]},
+                {id:'q6', domain:'postur', q:'Apakah meja, kursi, dan layar komputer Anda sudah ditata dengan baik sehingga tidak membuat tubuh tegang?', opts:['Ya, sangat baik','Cukup','Kurang','Sangat tidak nyaman'], scores:[0,1,2,3]},
+                {id:'q7', domain:'aktivitas', q:'Apakah Anda pernah mengalami cedera saat olahraga atau kecelakaan yang melukai sendi/otot dalam setahun terakhir?', opts:['Tidak','Cedera ringan yang sudah sembuh','Cedera yang kadang kambuh','Cedera berat yang belum pulih'], scores:[0,1,2,3]},
+                {id:'q8', domain:'aktivitas', q:'Apakah Anda biasa melakukan pemanasan sebelum olahraga atau aktivitas fisik yang berat?', opts:['Selalu','Sering','Jarang','Tidak pernah'], scores:[0,1,2,3]},
+                {id:'q9', domain:'aktivitas', q:'Apakah sendi Anda terasa kaku di pagi hari selama lebih dari 15 menit?', opts:['Tidak pernah','Jarang','Sering (2-3 kali seminggu)','Hampir setiap pagi'], scores:[0,1,2,3]},
+                {id:'q10', domain:'stres', q:'Apakah Anda sering sakit kepala yang terasa tegang di bagian belakang kepala atau leher?', opts:['Tidak pernah','Jarang','Sering','Sangat sering/kronis'], scores:[0,1,2,3]},
+                {id:'q11', domain:'stres', q:'Bagaimana kualitas tidur Anda?', opts:['Baik, cukup 7-9 jam','Cukup tapi kadang terbangun','Buruk, sering terbangun','Sangat buruk, susah tidur'], scores:[0,1,2,3]},
+                {id:'q12', domain:'stres', q:'Seberapa tinggi tingkat stres Anda sehari-hari?', opts:['Rendah','Sedang','Tinggi','Sangat tinggi'], scores:[0,1,2,3]}
+            ],
+            furtherExams: {
+                nyeri: [ { name:'Visual Analogue Scale (VAS)', desc:'Mengukur intensitas nyeri' } ],
+                postur: [ { name:'Postural Assessment (Plumb Line)', desc:'Analisis postur tubuh secara statis' } ],
+                aktivitas: [ { name:'Functional Movement Screen (FMS)', desc:'Skrining pola gerakan dasar' } ],
+                stres: [ { name:'Perceived Stress Scale (PSS)', desc:'Mengukur tingkat stres subjektif' } ]
+            },
+            exerciseRecs: {
+                nyeri: { name:'Peregangan & Penguatan', desc:'Lakukan peregangan leher (menunduk, menengadah) 5x tahan 10 detik. Untuk punggung, lakukan bridging: berbaring, angkat pinggul, tahan 5 detik, ulangi 10x.' },
+                postur: { name:'Koreksi Postur', desc:'Duduk dengan bantal kecil di pinggang, tarik dagu ke belakang (chin tuck) 10x setiap jam. Gerakan merapatkan tulang belikat 10x, tahan 5 detik.' },
+                aktivitas: { name:'Mobilitas Sendi', desc:'Pemanasan dinamis 5 menit sebelum olahraga: ayunan lengan, putaran bahu. Gunakan foam roller 2 menit setiap area.' },
+                stres: { name:'Relaksasi & Pernapasan', desc:'Latihan napas perut: tarik napas 4 detik, tahan 4 detik, buang 6 detik. Lakukan 5 menit sebelum tidur.' }
+            },
+            advancedTest: {
+                title: 'Test Lanjutan: Indeks Disabilitas Nyeri & Fungsional',
+                desc: 'Kuesioner mendalam untuk mengevaluasi dampak nyeri terhadap aktivitas sehari-hari dan kualitas hidup.',
+                sections: [
+                    {
+                        name: 'Intensitas Nyeri & Gangguan',
+                        questions: [
+                            {id:'a1', q:'Seberapa besar nyeri mengganggu aktivitas merawat diri (mandi, berpakaian)?', opts:['Tidak mengganggu','Sedikit, tapi bisa mandiri','Perlu bantuan','Tidak bisa mandiri'], scores:[0,1,2,3]},
+                            {id:'a2', q:'Apakah nyeri membatasi Anda mengangkat barang?', opts:['Tidak','Bisa angkat berat ringan','Hanya benda ringan','Tidak bisa mengangkat'], scores:[0,1,2,3]},
+                            {id:'a3', q:'Apakah nyeri mengganggu kemampuan berjalan?', opts:['Tidak','Jauh terbatas','Hanya jarak pendek','Tidak bisa berjalan'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Tidur & Energi',
+                        questions: [
+                            {id:'a4', q:'Apakah nyeri mempengaruhi kualitas tidur Anda?', opts:['Tidak','Kadang terbangun','Sering terbangun','Tidak bisa tidur'], scores:[0,1,2,3]},
+                            {id:'a5', q:'Apakah Anda merasa lelah atau kurang energi sepanjang hari?', opts:['Tidak','Sedikit','Cukup lelah','Sangat lelah'], scores:[0,1,2,3]},
+                            {id:'a6', q:'Apakah nyeri membuat Anda sulit berkonsentrasi?', opts:['Tidak','Jarang','Sering','Selalu'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Aktivitas Sosial & Kerja',
+                        questions: [
+                            {id:'a7', q:'Apakah nyeri mengurangi aktivitas sosial atau rekreasi?', opts:['Tidak','Sedikit','Cukup banyak','Sangat membatasi'], scores:[0,1,2,3]},
+                            {id:'a8', q:'Apakah nyeri membatasi Anda dalam melakukan pekerjaan rumah tangga?', opts:['Tidak','Ringan saja','Tugas berat terbatas','Hampir semua'], scores:[0,1,2,3]},
+                            {id:'a9', q:'Apakah Anda harus mengurangi jam kerja atau produktivitas karena nyeri?', opts:['Tidak','Kadang-kadang','Sering','Tidak bisa bekerja'], scores:[0,1,2,3]},
+                            {id:'a10', q:'Seberapa sering Anda merasa cemas atau tertekan karena kondisi nyeri?', opts:['Tidak pernah','Jarang','Sering','Selalu'], scores:[0,1,2,3]}
+                        ]
+                    }
+                ],
+                interpretation: (score, max) => {
+                    const pct = Math.round((score/max)*100);
+                    if(pct <= 20) return 'Nyeri berdampak minimal. Terus jaga postur dan aktivitas fisik.';
+                    if(pct <= 50) return 'Gangguan sedang. Disarankan fisioterapi untuk penguatan dan manajemen nyeri.';
+                    return 'Gangguan berat. Segera konsultasi dengan fisioterapis untuk program rehabilitasi menyeluruh.';
+                },
+                sectionAdvice: {
+                    'Intensitas Nyeri & Gangguan': 'Gunakan kompres hangat/dingin, peregangan ringan setiap 2 jam, dan hindari gerakan mendadak.',
+                    'Tidur & Energi': 'Terapkan sleep hygiene, matikan gawai 1 jam sebelum tidur, lakukan relaksasi napas 5 menit.',
+                    'Aktivitas Sosial & Kerja': 'Atur posisi kerja ergonomis, istirahat sejenak setiap 30 menit, dan komunikasikan kebutuhan dengan atasan.'
+                }
+            }
+        },
+        lansia: {
+            title: 'Pemeriksaan Fisioterapi — Lansia',
+            theme: 'elderly-theme',
+            fillClass: 'fill-elderly',
+            btnClass: 'btn-elderly',
+            domains: {
+                jatuh: { name:'Risiko Jatuh', questions:['q1','q2','q3'] },
+                mobilitas: { name:'Mobilitas & Keseimbangan', questions:['q4','q5','q6'] },
+                sendi: { name:'Nyeri Sendi & Kekakuan', questions:['q7','q8','q9'] },
+                kekuatan: { name:'Kekuatan & Kesehatan Tulang', questions:['q10','q11','q12'] }
+            },
+            questions: [
+                {id:'q1', domain:'jatuh', q:'Apakah Anda pernah terjatuh dalam 6 bulan terakhir?', opts:['Tidak pernah','1 kali','2 kali','3 kali atau lebih'], scores:[0,2,4,6]},
+                {id:'q2', domain:'jatuh', q:'Apakah Anda merasa goyah atau tidak stabil saat berjalan atau berdiri?', opts:['Tidak, stabil','Sedikit goyah','Cukup goyah','Sangat goyah, perlu bantuan'], scores:[0,1,2,3]},
+                {id:'q3', domain:'jatuh', q:'Apakah Anda menggunakan tongkat atau alat bantu jalan?', opts:['Tidak perlu','Kadang-kadang','Sering','Selalu atau tidak bisa jalan sendiri'], scores:[0,1,2,3]},
+                {id:'q4', domain:'mobilitas', q:'Apakah Anda sulit bangun dari kursi tanpa bantuan tangan?', opts:['Mudah','Sedikit sulit','Cukup sulit perlu bantuan tangan','Sangat sulit perlu bantuan orang'], scores:[0,1,2,3]},
+                {id:'q5', domain:'mobilitas', q:'Berapa lama Anda bisa berdiri tegak tanpa berpegangan?', opts:['Lebih dari 10 menit','5-10 menit','1-5 menit','Kurang dari 1 menit'], scores:[0,1,2,3]},
+                {id:'q6', domain:'mobilitas', q:'Apakah Anda sering merasa pusing atau oleng saat menoleh atau meraih sesuatu?', opts:['Tidak','Jarang','Sering','Selalu'], scores:[0,1,2,3]},
+                {id:'q7', domain:'sendi', q:'Apakah lutut atau pinggul Anda terasa nyeri, terutama setelah beraktivitas? (bisa jadi pengapuran sendi)', opts:['Tidak','Ringan/kadang-kadang','Sedang/sering','Berat/kronis'], scores:[0,1,2,3]},
+                {id:'q8', domain:'sendi', q:'Apakah sendi Anda terasa kaku sehingga sulit digerakkan saat beraktivitas?', opts:['Tidak','Sedikit kaku','Cukup kaku','Sangat kaku'], scores:[0,1,2,3]},
+                {id:'q9', domain:'sendi', q:'Apakah lutut atau pinggul Anda sering bengkak atau berbunyi "krek-krek" saat digerakkan?', opts:['Tidak','Jarang','Sering','Hampir selalu'], scores:[0,1,2,3]},
+                {id:'q10', domain:'kekuatan', q:'Apakah Anda merasa kekuatan tangan atau kaki menurun, misalnya sulit membuka tutup toples atau mengangkat belanjaan ringan?', opts:['Tidak','Sedikit menurun','Cukup menurun','Sangat menurun'], scores:[0,1,2,3]},
+                {id:'q11', domain:'kekuatan', q:'Apakah Anda pernah didiagnosis pengeroposan tulang (osteoporosis) atau pernah patah tulang karena jatuh ringan?', opts:['Tidak','Ada pengeroposan ringan (osteopenia)','Osteoporosis','Pernah patah tulang'], scores:[0,2,4,6]},
+                {id:'q12', domain:'kekuatan', q:'Apakah Anda cepat merasa lelah meskipun berjalan sebentar saja?', opts:['Tidak','Jarang','Sering','Selalu'], scores:[0,1,2,3]}
+            ],
+            furtherExams: {
+                jatuh: [ { name:'Timed Up and Go Test (TUG)', desc:'Menilai risiko jatuh dan mobilitas dasar' } ],
+                mobilitas: [ { name:'6-Minute Walk Test', desc:'Mengukur kapasitas fungsional berjalan' } ],
+                sendi: [ { name:'WOMAC Index', desc:'Menilai fungsi dan nyeri pada osteoartritis' } ],
+                kekuatan: [ { name:'Handgrip Strength Test', desc:'Kekuatan genggam sebagai indikator kelemahan umum' } ]
+            },
+            exerciseRecs: {
+                jatuh: { name:'Latihan Keseimbangan', desc:'Berdiri di samping kursi, angkat satu kaki tanpa berpegangan selama 5-10 detik. Ulangi 5x setiap sisi. Lakukan setiap pagi.' },
+                mobilitas: { name:'Mobilitas Fungsional', desc:'Latihan bangkit dari kursi tanpa bantuan tangan, ulangi 5-8 kali. Jalan di tempat sambil angkat lutut pelan-pelan 1 menit.' },
+                sendi: { name:'Penguatan Sendi', desc:'Duduk di kursi, luruskan lutut, tahan 5 detik, turunkan perlahan. Ulangi 10x untuk setiap kaki. Sepeda statis ringan 5-10 menit.' },
+                kekuatan: { name:'Penguatan Otot & Tulang', desc:'Berdiri dengan bantuan meja, angkat tumit (jinjit) 10x. Gunakan botol air sebagai beban untuk mengangkat lengan ke samping 10x.' }
+            },
+            advancedTest: {
+                title: 'Test Lanjutan: Mobilitas & Risiko Jatuh Lansia',
+                desc: 'Kuesioner mendalam untuk mengevaluasi keseimbangan, kekuatan, dan rasa takut jatuh.',
+                sections: [
+                    {
+                        name: 'Keseimbangan & Stabilitas',
+                        questions: [
+                            {id:'a1', q:'Apakah Anda bisa bangkit dari kursi tanpa bantuan lengan?', opts:['Mudah','Dengan sedikit usaha','Perlu bantuan tangan','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a2', q:'Apakah Anda merasa ragu atau takut akan jatuh saat berjalan di dalam rumah?', opts:['Tidak','Sedikit','Cukup','Sangat takut'], scores:[0,1,2,3]},
+                            {id:'a3', q:'Berapa lama Anda butuh untuk berjalan sejauh 3 meter, berbalik, dan kembali duduk? (perkirakan)', opts:['<10 detik','10-20 detik','20-30 detik','>30 detik'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Kekuatan & Mobilitas',
+                        questions: [
+                            {id:'a4', q:'Apakah Anda bisa naik tangga 2-3 anak tangga tanpa bantuan?', opts:['Ya, mudah','Perlu pegangan','Sulit, harus dibantu','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a5', q:'Apakah Anda mampu berbelok dengan stabil saat berjalan?', opts:['Ya, stabil','Kadang oleng','Sering oleng','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a6', q:'Apakah Anda menggunakan bantuan saat berjalan di luar rumah?', opts:['Tidak perlu','Tongkat kadang','Selalu pakai tongkat','Butuh walker/orang'], scores:[0,1,2,3]}
+                        ]
+                    },
+                    {
+                        name: 'Rasa Takut & Aktivitas Harian',
+                        questions: [
+                            {id:'a7', q:'Apakah Anda mengurangi aktivitas di luar rumah karena takut jatuh?', opts:['Tidak','Jarang','Sering','Selalu di rumah'], scores:[0,1,2,3]},
+                            {id:'a8', q:'Apakah Anda bisa berbelanja kebutuhan ringan secara mandiri?', opts:['Ya, lancar','Perlu bantuan sedikit','Selalu ditemani','Tidak bisa'], scores:[0,1,2,3]},
+                            {id:'a9', q:'Apakah Anda merasa pusing ketika berdiri dari duduk atau berbaring?', opts:['Tidak pernah','Jarang','Sering','Selalu'], scores:[0,1,2,3]},
+                            {id:'a10', q:'Apakah Anda pernah hampir jatuh saat berbelok mendadak?', opts:['Tidak pernah','1-2 kali','Beberapa kali','Sering'], scores:[0,1,2,3]}
+                        ]
+                    }
+                ],
+                interpretation: (score, max) => {
+                    const pct = Math.round((score/max)*100);
+                    if(pct <= 20) return 'Mobilitas baik, risiko jatuh rendah. Pertahankan latihan keseimbangan.';
+                    if(pct <= 50) return 'Risiko jatuh sedang. Disarankan latihan keseimbangan terstruktur dan modifikasi lingkungan rumah.';
+                    return 'Risiko jatuh tinggi. Segera evaluasi dengan fisioterapis dan pertimbangkan alat bantu yang tepat.';
+                },
+                sectionAdvice: {
+                    'Keseimbangan & Stabilitas': 'Latihan berdiri satu kaki, berjalan tandem (tumit-ke-jari), dan bangkit dari kursi tanpa bantuan.',
+                    'Kekuatan & Mobilitas': 'Latihan naik turun tangga perlahan, jalan di tempat dengan lutut diangkat, dan peregangan otot betis.',
+                    'Rasa Takut & Aktivitas Harian': 'Mulai dengan berjalan pendek di sekitar rumah, gunakan alat bantu jika perlu, dan diskusikan rasa takut dengan keluarga.'
+                }
+            }
+        }
+    };
+
+    let currentCategory = null;
+    let currentAnswers = {};
+    let advancedAnswers = {};
+    let advancedActive = false;
+    let lastMainResult = null;
+
+    function startSurvey(category) {
+        currentCategory = category;
+        currentAnswers = {};
+        advancedAnswers = {};
+        advancedActive = false;
+        lastMainResult = null;
+        document.getElementById('categoryGrid').style.display = 'none';
+        document.getElementById('mainHeader').querySelector('.subtitle').textContent = 'Jawab semua pertanyaan untuk analisis domain';
+        document.getElementById('mainHeader').querySelector('h1').textContent = surveyData[category].title;
+        document.getElementById('progressWrap').classList.add('active');
+        document.getElementById('backWrap').classList.add('active');
+        document.getElementById('resultSection').classList.remove('active');
+        document.getElementById('resultSection').innerHTML = '';
+        updateProgress();
+        renderSurvey();
+        document.getElementById('surveySection').classList.add('active');
+        document.getElementById('surveySection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function goBack() {
+        if (advancedActive) {
+            advancedActive = false;
+            advancedAnswers = {};
+            if (lastMainResult) {
+                showMainResultFromStored();
+            } else {
+                submitSurvey(true);
+            }
+            return;
+        }
+        currentCategory = null;
+        currentAnswers = {};
+        advancedAnswers = {};
+        advancedActive = false;
+        lastMainResult = null;
+        document.getElementById('categoryGrid').style.display = '';
+        document.getElementById('mainHeader').querySelector('h1').textContent = 'Survey Pemeriksaan Fisioterapi';
+        document.getElementById('mainHeader').querySelector('.subtitle').textContent = 'Pilih kategori usia untuk memulai assessment yang mudah dipahami';
+        document.getElementById('progressWrap').classList.remove('active');
+        document.getElementById('backWrap').classList.remove('active');
+        document.getElementById('surveySection').classList.remove('active');
+        document.getElementById('surveySection').innerHTML = '';
+        document.getElementById('resultSection').classList.remove('active');
+        document.getElementById('resultSection').innerHTML = '';
+        window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function updateProgress(total, answered) {
+        const data = surveyData[currentCategory];
+        const t = total || data.questions.length;
+        const a = answered !== undefined ? answered : Object.keys(currentAnswers).length;
+        const percent = Math.round((a/t)*100);
+        document.getElementById('progressPercent').textContent = percent+'%';
+        document.getElementById('progressLabel').textContent = `Progress (${a}/${t})`;
+        const fill = document.getElementById('progressFill');
+        fill.style.width = percent+'%';
+        fill.className = 'progress-fill '+data.fillClass;
+    }
+
+    function renderSurvey(advanced = false) {
+        const data = surveyData[currentCategory];
+        const theme = data.theme;
+        let html = '';
+        if (!advanced) {
+            const domains = data.domains;
+            for (let [domainKey, domainObj] of Object.entries(domains)) {
+                html += `<div class="domain-header">${domainObj.name}</div>`;
+                domainObj.questions.forEach(qId => {
+                    const q = data.questions.find(q => q.id === qId);
+                    if (!q) return;
+                    const selected = currentAnswers[q.id] !== undefined ? currentAnswers[q.id] : null;
+                    html += `
+                    <div class="survey-card ${theme}" id="card-${q.id}">
+                        <span class="q-num">${data.questions.indexOf(q)+1}</span>
+                        <h4>${q.q}</h4>
+                        <div class="options">
+                            ${q.opts.map((opt, oi) => `
+                                <button class="option-btn ${selected === oi ? 'selected' : ''}"
+                                        onclick="selectAnswer('${q.id}', ${oi}, '${theme}')"
+                                        id="btn-${q.id}-${oi}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                });
+            }
+            html += `
+            <div class="btn-group">
+                <button class="btn ${data.btnClass}" onclick="submitSurvey()" id="submitBtn" disabled>
+                    Lihat Analisis & Pemeriksaan Lanjutan
+                </button>
+                <button class="btn btn-outline" onclick="resetSurvey()">Reset Semua Jawaban</button>
+            </div>`;
+            document.getElementById('surveySection').innerHTML = html;
+            updateSubmitButton();
+            updateProgress();
+        } else {
+            const adv = data.advancedTest;
+            document.getElementById('progressWrap').classList.add('active');
+            document.getElementById('backWrap').classList.add('active');
+            document.getElementById('mainHeader').querySelector('h1').textContent = adv.title;
+            document.getElementById('mainHeader').querySelector('.subtitle').textContent = adv.desc;
+            let globalIdx = 0;
+            adv.sections.forEach(section => {
+                html += `<div class="domain-header">${section.name}</div>`;
+                section.questions.forEach(q => {
+                    const selected = advancedAnswers[q.id] !== undefined ? advancedAnswers[q.id] : null;
+                    html += `
+                    <div class="survey-card ${theme}" id="card-adv-${q.id}">
+                        <span class="q-num">${++globalIdx}</span>
+                        <h4>${q.q}</h4>
+                        <div class="options">
+                            ${q.opts.map((opt, oi) => `
+                                <button class="option-btn ${selected === oi ? 'selected' : ''}"
+                                        onclick="selectAdvancedAnswer('${q.id}', ${oi}, '${theme}')"
+                                        id="btn-adv-${q.id}-${oi}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                });
+            });
+            html += `
+            <div class="btn-group">
+                <button class="btn ${data.btnClass}" onclick="submitAdvancedTest()" id="advSubmitBtn" disabled>
+                    Lihat Rangkuman Akhir & Home Program
+                </button>
+                <button class="btn btn-outline" onclick="resetAdvancedTest()">Reset Test Lanjutan</button>
+            </div>`;
+            document.getElementById('surveySection').innerHTML = html;
+            updateAdvancedSubmitButton();
+            const totalQ = adv.sections.reduce((sum, s) => sum + s.questions.length, 0);
+            updateProgress(totalQ, Object.keys(advancedAnswers).length);
+        }
+        document.getElementById('surveySection').classList.add('active');
+        document.getElementById('resultSection').classList.remove('active');
+        document.getElementById('surveySection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function selectAnswer(qId, optIdx, theme) {
+        currentAnswers[qId] = optIdx;
+        const card = document.getElementById('card-'+qId);
+        if (card) {
+            card.querySelectorAll('.option-btn').forEach((btn,i) => {
+                btn.classList.remove('selected');
+                if (i === optIdx) btn.classList.add('selected');
+            });
+        }
+        updateSubmitButton();
+        updateProgress();
+    }
+
+    function selectAdvancedAnswer(qId, optIdx, theme) {
+        advancedAnswers[qId] = optIdx;
+        const card = document.getElementById('card-adv-'+qId);
+        if (card) {
+            card.querySelectorAll('.option-btn').forEach((btn,i) => {
+                btn.classList.remove('selected');
+                if (i === optIdx) btn.classList.add('selected');
+            });
+        }
+        updateAdvancedSubmitButton();
+        const adv = surveyData[currentCategory].advancedTest;
+        const total = adv.sections.reduce((s, sec) => s + sec.questions.length, 0);
+        updateProgress(total, Object.keys(advancedAnswers).length);
+    }
+
+    function updateSubmitButton() {
+        const data = surveyData[currentCategory];
+        const total = data.questions.length;
+        const answered = Object.keys(currentAnswers).length;
+        const btn = document.getElementById('submitBtn');
+        if (btn) {
+            btn.disabled = answered < total;
+            btn.textContent = answered < total ? `Jawab semua (${answered}/${total})` : 'Lihat Analisis & Pemeriksaan Lanjutan';
+        }
+    }
+
+    function updateAdvancedSubmitButton() {
+        const adv = surveyData[currentCategory].advancedTest;
+        const total = adv.sections.reduce((s, sec) => s + sec.questions.length, 0);
+        const answered = Object.keys(advancedAnswers).length;
+        const btn = document.getElementById('advSubmitBtn');
+        if (btn) {
+            btn.disabled = answered < total;
+            btn.textContent = answered < total ? `Jawab semua (${answered}/${total})` : 'Lihat Rangkuman Akhir & Home Program';
+        }
+    }
+
+    function resetSurvey() {
+        currentAnswers = {};
+        advancedAnswers = {};
+        advancedActive = false;
+        renderSurvey();
+        document.getElementById('surveySection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function resetAdvancedTest() {
+        advancedAnswers = {};
+        renderSurvey(true);
+        document.getElementById('surveySection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function submitSurvey(keepResult = false) {
+        if (!keepResult) {
+            const data = surveyData[currentCategory];
+            if (Object.keys(currentAnswers).length < data.questions.length) {
+                alert('Mohon lengkapi semua pertanyaan terlebih dahulu.');
+                return;
+            }
+        }
+        advancedActive = false;
+        showMainResult();
+    }
+
+    function showMainResult() {
+        const data = surveyData[currentCategory];
+        let totalScore = 0;
+        let maxTotal = 0;
+        const domainScores = {};
+        const domainMax = {};
+        data.questions.forEach(q => {
+            const score = q.scores[currentAnswers[q.id]];
+            totalScore += score;
+            maxTotal += Math.max(...q.scores);
+            const d = q.domain;
+            if (!domainScores[d]) { domainScores[d] = 0; domainMax[d] = 0; }
+            domainScores[d] += score;
+            domainMax[d] += Math.max(...q.scores);
+        });
+
+        const overallPercent = Math.round((totalScore / maxTotal) * 100);
+        let riskLevel, riskColor, scoreClass;
+        if (overallPercent <= 25) { riskLevel='Risiko Rendah'; riskColor='#27ae60'; scoreClass='score-low'; }
+        else if (overallPercent <= 55) { riskLevel='Risiko Sedang'; riskColor='#f39c12'; scoreClass='score-mid'; }
+        else { riskLevel='Risiko Tinggi'; riskColor='#e74c3c'; scoreClass='score-high'; }
+
+        const domainPercentages = {};
+        for (let [dKey, dObj] of Object.entries(data.domains)) {
+            const score = domainScores[dKey] || 0;
+            const max = domainMax[dKey] || 1;
+            domainPercentages[dKey] = Math.round((score / max) * 100);
+        }
+
+        lastMainResult = {
+            overallPercent, riskLevel, riskColor, scoreClass,
+            totalScore, maxTotal, domainScores, domainMax, domainPercentages,
+            category: currentCategory
+        };
+        showMainResultFromStored();
+    }
+
+    function showMainResultFromStored() {
+        if (!lastMainResult) return;
+        const data = surveyData[lastMainResult.category];
+        const { overallPercent, riskLevel, riskColor, scoreClass, totalScore, maxTotal, domainScores, domainMax, domainPercentages } = lastMainResult;
+
+        let domainBarsHtml = '';
+        for (let [dKey, dObj] of Object.entries(data.domains)) {
+            const score = domainScores[dKey] || 0;
+            const max = domainMax[dKey] || 1;
+            const pct = domainPercentages[dKey];
+            let barClass = 'domain-low';
+            if (pct > 55) barClass = 'domain-high';
+            else if (pct > 25) barClass = 'domain-mid';
+            domainBarsHtml += `
+            <div class="domain-item">
+                <div class="domain-label"><span>${dObj.name}</span><span>${score}/${max} (${pct}%)</span></div>
+                <div class="domain-bar-bg"><div class="domain-bar-fill ${barClass}" style="width:${pct}%;"></div></div>
+            </div>`;
+        }
+
+        const sortedDomains = Object.entries(domainPercentages).sort((a,b) => b[1] - a[1]);
+        let conclusionText = '';
+        if (overallPercent <= 25) {
+            conclusionText = 'Hasil skrining menunjukkan kondisi Anda secara umum baik.';
+        } else {
+            const topDomains = sortedDomains.filter(([key, pct]) => pct > 25).slice(0,2);
+            if (topDomains.length > 0) {
+                const domainNames = topDomains.map(([key]) => data.domains[key].name).join(' dan ');
+                conclusionText = `Anda memiliki ${riskLevel.toLowerCase()} terutama pada area <strong>${domainNames}</strong>.`;
+            } else {
+                conclusionText = `Skor total menunjukkan ${riskLevel.toLowerCase()}.`;
+            }
+        }
+
+        const recs = getDomainRecommendations(domainScores, domainMax);
+        const exams = getFurtherExaminations(domainScores, domainMax);
+        const exercises = getExerciseRecommendations(domainScores, domainMax);
+        const categoryName = currentCategory==='anak'?'Anak':currentCategory==='dewasa'?'Dewasa':'Lansia';
+
+        let examTableHtml = exams.length > 0 ? `
+            <table class="result-table">
+                <thead><tr><th>Area</th><th>Pemeriksaan yang Disarankan</th><th>Keterangan</th></tr></thead>
+                <tbody>${exams.map(e => `<tr><td>${e.domainName}</td><td><strong>${e.exam.name}</strong></td><td>${e.exam.desc}</td></tr>`).join('')}</tbody>
+            </table>` : '<p style="font-size:0.9rem; color:var(--text-light);">Tidak ada pemeriksaan khusus yang disarankan.</p>';
+
+        let exerciseTableHtml = exercises.length > 0 ? `
+            <table class="result-table">
+                <thead><tr><th>Area</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
+                <tbody>${exercises.map(ex => `<tr><td>${ex.domainName}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}</tbody>
+            </table>` : '<p style="font-size:0.9rem; color:var(--text-light);">Kondisi Anda baik, lanjutkan aktivitas fisik rutin.</p>';
+
+        const resultHTML = `
+        <div class="result-card">
+            <div class="result-header">
+                <h2>Hasil Pemeriksaan ${categoryName}</h2>
+                <div class="score-circle ${scoreClass}">${overallPercent}%</div>
+                <p style="font-weight:700;color:${riskColor};font-size:1.1rem;">${riskLevel}</p>
+                <p style="font-size:0.85rem;color:var(--text-light);">Skor Total: ${totalScore} / ${maxTotal}</p>
+            </div>
+            <div class="result-detail" style="margin-bottom:16px;"><h4>Kesimpulan</h4><p>${conclusionText}</p></div>
+            <div class="domain-bars"><h4>Analisis per Area</h4>${domainBarsHtml}</div>
+            <div class="result-detail"><h4>Rekomendasi Umum</h4><ul>${recs.map(r => r).join('')}</ul></div>
+            <div class="exam-list"><h5>Pemeriksaan Lanjutan yang Disarankan</h5>${examTableHtml}</div>
+            <div class="exercise-list"><h5>Latihan yang Bisa Dilakukan Sendiri di Rumah</h5>${exerciseTableHtml}</div>
+            <div class="action-box">
+                <p><strong>Langkah Selanjutnya:</strong> Diskusikan dengan fisioterapis profesional.</p>
+                <a href="https://www.google.com/maps/search/fisioterapis+terdekat" target="_blank" rel="noopener" class="btn ${data.btnClass}" style="text-decoration:none;">Temukan Fisioterapis Terdekat</a>
+            </div>
+            <div class="advanced-test-box">
+                <p><strong>Ingin evaluasi lebih spesifik?</strong></p>
+                <button class="btn ${data.btnClass}" onclick="startAdvancedTest()">Mulai Test Lanjutan: ${data.advancedTest.title}</button>
+            </div>
+            <p style="margin-top:16px;font-size:0.8rem;color:var(--text-light);">⚠️ Hasil ini bersifat skrining awal, bukan diagnosis medis.</p>
+        </div>
+        <div class="btn-group" style="margin-top:20px;">
+            <button class="btn btn-outline" onclick="goBack()">← Pilih Kategori Lain</button>
+            <button class="btn ${data.btnClass}" onclick="resetSurvey(); window.scrollTo({top: document.getElementById('surveySection').offsetTop-80, behavior:'smooth'});">Isi Ulang Survey</button>
+        </div>`;
+        document.getElementById('resultSection').innerHTML = resultHTML;
+        document.getElementById('resultSection').classList.add('active');
+        document.getElementById('surveySection').classList.remove('active');
+        document.getElementById('backWrap').classList.remove('active');
+        document.getElementById('progressWrap').classList.remove('active');
+        document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function startAdvancedTest() {
+        advancedActive = true;
+        advancedAnswers = {};
+        document.getElementById('resultSection').classList.remove('active');
+        document.getElementById('backWrap').classList.add('active');
+        renderSurvey(true);
+    }
+
+    function submitAdvancedTest() {
+        const data = surveyData[currentCategory];
+        const adv = data.advancedTest;
+        const totalQ = adv.sections.reduce((s, sec) => s + sec.questions.length, 0);
+        if (Object.keys(advancedAnswers).length < totalQ) {
+            alert('Mohon lengkapi semua pertanyaan test lanjutan.');
+            return;
+        }
+
+        let totalAdvancedScore = 0;
+        let maxAdvancedTotal = 0;
+        const sectionScores = {};
+        adv.sections.forEach(section => {
+            let secScore = 0, secMax = 0;
+            section.questions.forEach(q => {
+                const score = q.scores[advancedAnswers[q.id]];
+                totalAdvancedScore += score;
+                secScore += score;
+                secMax += Math.max(...q.scores);
+            });
+            maxAdvancedTotal += secMax;
+            sectionScores[section.name] = { score: secScore, max: secMax, pct: Math.round((secScore/secMax)*100) };
+        });
+
+        const advancedPercent = Math.round((totalAdvancedScore / maxAdvancedTotal) * 100);
+        const advInterpretation = adv.interpretation(totalAdvancedScore, maxAdvancedTotal);
+
+        const main = lastMainResult;
+        const catData = surveyData[currentCategory];
+
+        // Gabung latihan untuk home program
+        let allExercises = [];
+        if (main) {
+            const entries = Object.entries(catData.domains).map(([key, obj]) => {
+                const score = main.domainScores[key] || 0;
+                const max = main.domainMax[key] || 1;
+                return { key, name: obj.name, pct: Math.round((score/max)*100) };
+            }).filter(d => d.pct > 25).sort((a,b) => b.pct - a.pct);
+            for (let d of entries) {
+                if (allExercises.length >= 6) break;
+                const rec = catData.exerciseRecs[d.key];
+                if (rec) allExercises.push({ source: d.name, exercise: rec });
+            }
+        }
+        for (let [secName, sc] of Object.entries(sectionScores)) {
+            if (sc.pct > 25) {
+                const advice = adv.sectionAdvice ? (adv.sectionAdvice[secName] || '') : '';
+                if (advice) {
+                    allExercises.push({ source: secName, exercise: { name: `Latihan untuk ${secName}`, desc: advice } });
+                }
+            }
+        }
+
+        let exerciseTableHtml = '';
+        if (allExercises.length > 0) {
+            exerciseTableHtml = `
+            <table class="result-table">
+                <thead><tr><th>Terkait Kondisi</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
+                <tbody>
+                    ${allExercises.map(ex => `<tr><td>${ex.source}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}
+                </tbody>
+            </table>`;
+        } else {
+            exerciseTableHtml = '<p style="font-size:0.9rem;">Pertahankan aktivitas fisik rutin sesuai usia dan kondisi Anda.</p>';
+        }
+
+        let mainSummary = '';
+        if (main) {
+            mainSummary = `
+                <p><strong>Dari survei awal:</strong> Tingkat risiko Anda <strong>${main.riskLevel}</strong> (${main.overallPercent}%). Area yang paling perlu diperhatikan: ${Object.entries(main.domainPercentages).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>catData.domains[k].name).join(', ')}.</p>
+            `;
+        }
+
+        // Fungsi penjelasan hasil aspek (bahasa awam)
+        function getSectionExplanation(name, pct) {
+            if (pct <= 20) return `Hasil di aspek "${name}" cukup baik. Tidak ada tanda-tanda masalah yang berarti.`;
+            if (pct <= 50) return `Aspek "${name}" menunjukkan kondisi sedang. Ada beberapa hal yang bisa diperbaiki agar lebih optimal.`;
+            return `Aspek "${name}" cukup tinggi. Artinya, ada cukup banyak keluhan atau kesulitan di area ini. Sebaiknya beri perhatian lebih.`;
+        }
+
+        const finalHTML = `
+        <div class="result-card">
+            <div class="result-header">
+                <h2>Rangkuman Akhir Pemeriksaan Anda</h2>
+                <p style="font-size:1rem;">Setelah menjawab semua pertanyaan, berikut ini gambaran kondisi Anda secara keseluruhan.</p>
+            </div>
+            <div class="result-detail">
+                <h4>Ringkasan Hasil</h4>
+                ${mainSummary}
+                <p><strong>Dari test tambahan:</strong> ${advInterpretation} (Skor ${advancedPercent}%).</p>
+            </div>
+            <div class="exam-list">
+                <h5>Hasil Lebih Detail per Aspek</h5>
+                <table class="result-table">
+                    <thead><tr><th>Aspek yang Diperiksa</th><th>Skor</th><th>%</th><th>Penjelasan Hasil</th></tr></thead>
+                    <tbody>
+                        ${Object.entries(sectionScores).map(([name,sc]) => {
+                            let barClass = 'domain-low';
+                            if (sc.pct > 55) barClass = 'domain-high';
+                            else if (sc.pct > 25) barClass = 'domain-mid';
+                            const explanation = getSectionExplanation(name, sc.pct);
+                            return `<tr>
+                                <td>${name}</td>
+                                <td>${sc.score}/${sc.max}</td>
+                                <td><div class="domain-bar-bg"><div class="domain-bar-fill ${barClass}" style="width:${sc.pct}%;"></div></div> ${sc.pct}%</td>
+                                <td>${explanation}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="result-detail">
+                <h4>Apa yang Sebaiknya Anda Lakukan?</h4>
+                <p>Berdasarkan hasil di atas, berikut langkah-langkah yang bisa Anda ambil:</p>
+                <ul>
+                    <li>Jika ada area dengan risiko sedang atau tinggi, sebaiknya konsultasikan dengan fisioterapis untuk evaluasi lebih lanjut.</li>
+                    <li>Lakukan latihan mandiri di rumah secara teratur sesuai rekomendasi di bawah ini.</li>
+                    <li>Perbaiki posisi duduk, cara beraktivitas, dan kelola stres agar keluhan tidak bertambah parah.</li>
+                    <li>Pantau perkembangan Anda. Jika keluhan tidak membaik dalam 2-4 minggu, segera cari bantuan profesional.</li>
+                </ul>
+            </div>
+            <div class="exercise-list">
+                <h5>Latihan yang Bisa Dilakukan Sendiri di Rumah</h5>
+                ${exerciseTableHtml}
+            </div>
+            <div class="action-box">
+                <p><strong>Langkah Selanjutnya:</strong> Gunakan rangkuman ini sebagai panduan. Temui fisioterapis untuk program yang lebih personal.</p>
+                <a href="https://www.google.com/maps/search/fisioterapis+terdekat" target="_blank" rel="noopener" class="btn ${data.btnClass}" style="text-decoration:none;">Temukan Fisioterapis Terdekat</a>
+            </div>
+            <div style="margin-top:16px; text-align:center;">
+                <button class="btn btn-outline" onclick="goBack()">← Kembali ke Hasil Utama</button>
+                <button class="btn ${data.btnClass}" onclick="startAdvancedTest()">Ulangi Test Lanjutan</button>
+            </div>
+        </div>`;
+        document.getElementById('resultSection').innerHTML = finalHTML;
+        document.getElementById('resultSection').classList.add('active');
+        document.getElementById('surveySection').classList.remove('active');
+        document.getElementById('backWrap').classList.remove('active');
+        document.getElementById('progressWrap').classList.remove('active');
+        document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function getDomainRecommendations(domainScores, domainMax) {
+        const recs = [];
+        const catData = surveyData[currentCategory];
+        for (let [dKey, dObj] of Object.entries(catData.domains)) {
+            const score = domainScores[dKey] || 0;
+            const max = domainMax[dKey] || 1;
+            const pct = Math.round((score/max)*100);
+            if (pct <= 25) recs.push(`<li class="li-good">${dObj.name}: Kondisi baik.</li>`);
+            else if (pct <= 55) recs.push(`<li class="li-warn">${dObj.name}: Perlu perhatian.</li>`);
+            else recs.push(`<li class="li-danger">${dObj.name}: Prioritas tinggi.</li>`);
+        }
+        return recs;
+    }
+
+    function getFurtherExaminations(domainScores, domainMax) {
+        const data = surveyData[currentCategory];
+        const entries = Object.entries(data.domains).map(([key, obj]) => {
+            const score = domainScores[key] || 0;
+            const max = domainMax[key] || 1;
+            return { key, name: obj.name, pct: Math.round((score/max)*100) };
+        }).filter(d => d.pct > 25).sort((a,b) => b.pct - a.pct);
+        const exams = [];
+        for (let d of entries) {
+            if (exams.length >= 3) break;
+            const list = data.furtherExams[d.key];
+            if (list && list.length) exams.push({ domainName: d.name, exam: list[0] });
+        }
+        return exams;
+    }
+
+    function getExerciseRecommendations(domainScores, domainMax) {
+        const data = surveyData[currentCategory];
+        const entries = Object.entries(data.domains).map(([key, obj]) => {
+            const score = domainScores[key] || 0;
+            const max = domainMax[key] || 1;
+            return { key, name: obj.name, pct: Math.round((score/max)*100) };
+        }).filter(d => d.pct > 25).sort((a,b) => b.pct - a.pct);
+        const exercises = [];
+        for (let d of entries) {
+            if (exercises.length >= 3) break;
+            const rec = data.exerciseRecs[d.key];
+            if (rec) exercises.push({ domainName: d.name, exercise: rec });
+        }
+        return exercises;
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+        document.getElementById('surveySection').classList.remove('active');
+        document.getElementById('resultSection').classList.remove('active');
+        document.getElementById('backWrap').classList.remove('active');
+        document.getElementById('progressWrap').classList.remove('active');
+    });
+</script>
+</body>
+</html>
