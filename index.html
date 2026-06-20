@@ -302,16 +302,24 @@
         .li-warn::before{ content:'⚠'; color:#e67e22; }
         .li-danger::before{ content:'✗'; color:#e74c3c; }
 
+        /* Tabel responsif */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 12px;
+        }
         .result-table{
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
             font-size: 0.9rem;
+            min-width: 600px; /* agar pada mobile bisa discroll */
         }
         .result-table th, .result-table td{
             padding: 10px 12px;
             border: 1px solid var(--border);
             text-align: left;
+            word-wrap: break-word;
         }
         .result-table th{
             background: #f0f4f8;
@@ -375,7 +383,9 @@
             .option-btn{ min-width:100%; }
             .btn-group{ flex-direction:column; }
             .btn{ width:100%; }
-            .result-table th, .result-table td{ padding: 8px; }
+            .result-table{ font-size: 0.8rem; }
+            .result-table th, .result-table td{ padding: 8px 6px; }
+            .result-card{ padding: 20px 16px; }
         }
     </style>
 </head>
@@ -421,7 +431,7 @@
 </div>
 
 <script>
-    // Data survey sama seperti sebelumnya
+    // Data survey sama seperti sebelumnya, tidak diubah
     const surveyData = {
         anak: {
             title: 'Pemeriksaan Fisioterapi — Anak-Anak',
@@ -968,16 +978,20 @@
         const categoryName = currentCategory==='anak'?'Anak':currentCategory==='dewasa'?'Dewasa':'Lansia';
 
         let examTableHtml = exams.length > 0 ? `
-            <table class="result-table">
-                <thead><tr><th>Area</th><th>Pemeriksaan yang Disarankan</th><th>Keterangan</th></tr></thead>
-                <tbody>${exams.map(e => `<tr><td>${e.domainName}</td><td><strong>${e.exam.name}</strong></td><td>${e.exam.desc}</td></tr>`).join('')}</tbody>
-            </table>` : '<p style="font-size:0.9rem; color:var(--text-light);">Tidak ada pemeriksaan khusus yang disarankan.</p>';
+            <div class="table-responsive">
+                <table class="result-table">
+                    <thead><tr><th>Area</th><th>Pemeriksaan yang Disarankan</th><th>Keterangan</th></tr></thead>
+                    <tbody>${exams.map(e => `<tr><td>${e.domainName}</td><td><strong>${e.exam.name}</strong></td><td>${e.exam.desc}</td></tr>`).join('')}</tbody>
+                </table>
+            </div>` : '<p style="font-size:0.9rem; color:var(--text-light);">Tidak ada pemeriksaan khusus yang disarankan.</p>';
 
         let exerciseTableHtml = exercises.length > 0 ? `
-            <table class="result-table">
-                <thead><tr><th>Area</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
-                <tbody>${exercises.map(ex => `<tr><td>${ex.domainName}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}</tbody>
-            </table>` : '<p style="font-size:0.9rem; color:var(--text-light);">Kondisi Anda baik, lanjutkan aktivitas fisik rutin.</p>';
+            <div class="table-responsive">
+                <table class="result-table">
+                    <thead><tr><th>Area</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
+                    <tbody>${exercises.map(ex => `<tr><td>${ex.domainName}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}</tbody>
+                </table>
+            </div>` : '<p style="font-size:0.9rem; color:var(--text-light);">Kondisi Anda baik, lanjutkan aktivitas fisik rutin.</p>';
 
         const resultHTML = `
         <div class="result-card">
@@ -1052,7 +1066,6 @@
         const main = lastMainResult;
         const catData = surveyData[currentCategory];
 
-        // Gabung latihan untuk home program
         let allExercises = [];
         if (main) {
             const entries = Object.entries(catData.domains).map(([key, obj]) => {
@@ -1078,12 +1091,14 @@
         let exerciseTableHtml = '';
         if (allExercises.length > 0) {
             exerciseTableHtml = `
-            <table class="result-table">
-                <thead><tr><th>Terkait Kondisi</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
-                <tbody>
-                    ${allExercises.map(ex => `<tr><td>${ex.source}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}
-                </tbody>
-            </table>`;
+            <div class="table-responsive">
+                <table class="result-table">
+                    <thead><tr><th>Terkait Kondisi</th><th>Latihan</th><th>Cara Melakukan di Rumah</th></tr></thead>
+                    <tbody>
+                        ${allExercises.map(ex => `<tr><td>${ex.source}</td><td><strong>${ex.exercise.name}</strong></td><td>${ex.exercise.desc}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
         } else {
             exerciseTableHtml = '<p style="font-size:0.9rem;">Pertahankan aktivitas fisik rutin sesuai usia dan kondisi Anda.</p>';
         }
@@ -1095,7 +1110,6 @@
             `;
         }
 
-        // Fungsi penjelasan hasil aspek (bahasa awam)
         function getSectionExplanation(name, pct) {
             if (pct <= 20) return `Hasil di aspek "${name}" cukup baik. Tidak ada tanda-tanda masalah yang berarti.`;
             if (pct <= 50) return `Aspek "${name}" menunjukkan kondisi sedang. Ada beberapa hal yang bisa diperbaiki agar lebih optimal.`;
@@ -1115,23 +1129,25 @@
             </div>
             <div class="exam-list">
                 <h5>Hasil Lebih Detail per Aspek</h5>
-                <table class="result-table">
-                    <thead><tr><th>Aspek yang Diperiksa</th><th>Skor</th><th>%</th><th>Penjelasan Hasil</th></tr></thead>
-                    <tbody>
-                        ${Object.entries(sectionScores).map(([name,sc]) => {
-                            let barClass = 'domain-low';
-                            if (sc.pct > 55) barClass = 'domain-high';
-                            else if (sc.pct > 25) barClass = 'domain-mid';
-                            const explanation = getSectionExplanation(name, sc.pct);
-                            return `<tr>
-                                <td>${name}</td>
-                                <td>${sc.score}/${sc.max}</td>
-                                <td><div class="domain-bar-bg"><div class="domain-bar-fill ${barClass}" style="width:${sc.pct}%;"></div></div> ${sc.pct}%</td>
-                                <td>${explanation}</td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="result-table">
+                        <thead><tr><th>Aspek yang Diperiksa</th><th>Skor</th><th>%</th><th>Penjelasan Hasil</th></tr></thead>
+                        <tbody>
+                            ${Object.entries(sectionScores).map(([name,sc]) => {
+                                let barClass = 'domain-low';
+                                if (sc.pct > 55) barClass = 'domain-high';
+                                else if (sc.pct > 25) barClass = 'domain-mid';
+                                const explanation = getSectionExplanation(name, sc.pct);
+                                return `<tr>
+                                    <td>${name}</td>
+                                    <td>${sc.score}/${sc.max}</td>
+                                    <td><div class="domain-bar-bg"><div class="domain-bar-fill ${barClass}" style="width:${sc.pct}%;"></div></div> ${sc.pct}%</td>
+                                    <td>${explanation}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="result-detail">
                 <h4>Apa yang Sebaiknya Anda Lakukan?</h4>
